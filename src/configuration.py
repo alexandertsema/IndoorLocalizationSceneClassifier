@@ -32,15 +32,22 @@ class Configuration(object):
         self.IMAGE_SIZE = Size(268, 32, 3)
 
         """
+        output params
+        """
+        self.OUTPUT_PATH = 'out'
+
+        """
         training params
         """
 
         self.BATCH_SIZE = 128
         self.EPOCHS = 1000
+        self.STEPS = 10000
+        self.LOG_PERIOD = 10
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.SHUFFLE_BATCH = True
         self.NUM_PREPROCESSING_THREADS = 16
         self.MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
-        self.NUM_EPOCHS_PER_DECAY = 100  # Epochs after which learning rate decays.
-        self.LEARNING_RATE_DECAY_FACTOR = 0.0005  # Learning rate decay factor.
-        self.INITIAL_LEARNING_RATE = 0.001  # Initial learning rate.
+        self.NUM_EPOCHS_PER_DECAY = 10  # Epochs after which learning rate decays.
+        self.LEARNING_RATE_DECAY_FACTOR = 0.01  # Learning rate decay factor.
+        self.INITIAL_LEARNING_RATE = 0.1  # Initial learning rate.

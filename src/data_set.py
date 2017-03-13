@@ -79,7 +79,7 @@ class DataSet(object):
         # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
         # [mnist.IMAGE_PIXELS].
         image = tf.decode_raw(features['image_raw'], tf.uint8)
-        image.set_shape([self.config.IMAGE_SIZE.WIDTH * self.config.IMAGE_SIZE.HEIGHT * self.config.IMAGE_SIZE.CHANNELS])
+        image.set_shape([self.config.IMAGE_SIZE.WIDTH * self.config.IMAGE_SIZE.HEIGHT * self.config.IMAGE_SIZE.CHANNELS])  # TODO pay attension to shape (x)->(x,x,x)
 
         # OPTIONAL: Could reshape into a 28x28 image and apply distortions
         # here.  Since we are not applying any distortions in this
