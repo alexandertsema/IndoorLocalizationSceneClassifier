@@ -68,4 +68,4 @@ class Inputs:
         return misc.imread(file_name)
 
     def preprocess_image(self, raw_image):
-        return misc.imresize(raw_image, (self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.CHANNELS), interp='bilinear', mode=None)
+        return misc.imresize(raw_image, (self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS), interp='bilinear', mode=None)

@@ -17,8 +17,8 @@ class Converter:
 
         if images.shape[0] != num_examples:
             raise ValueError('Images size %d does not match label size %d.' % (images.shape[0], num_examples))
-        cols = images.shape[1]
-        rows = images.shape[2]
+        rows = images.shape[1]
+        cols = images.shape[2]
         depth = images.shape[3]
 
         filename = os.path.join(self.config.DATA_SET_PATH, name + '.tfrecords')

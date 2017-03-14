@@ -74,12 +74,12 @@ class DataSet(object):
                 'image_raw': tf.FixedLenFeature([], tf.string),
                 'label':     tf.FixedLenFeature([], tf.int64),
             })
-
+        from tensorflow.examples.tutorials.mnist import mnist
         # Convert from a scalar string tensor (whose single string has
         # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
         # [mnist.IMAGE_PIXELS].
         image = tf.decode_raw(features['image_raw'], tf.uint8)
-        image.set_shape([self.config.IMAGE_SIZE.WIDTH * self.config.IMAGE_SIZE.HEIGHT * self.config.IMAGE_SIZE.CHANNELS])  # TODO pay attension to shape (x)->(x,x,x)
+        image.set_shape([self.config.IMAGE_SIZE.WIDTH * self.config.IMAGE_SIZE.HEIGHT * self.config.IMAGE_SIZE.CHANNELS])
 
         # OPTIONAL: Could reshape into a 28x28 image and apply distortions
         # here.  Since we are not applying any distortions in this

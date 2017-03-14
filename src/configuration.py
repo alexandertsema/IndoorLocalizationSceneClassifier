@@ -44,6 +44,7 @@ class Configuration(object):
         self.EPOCHS = 1000
         self.STEPS = 10000
         self.LOG_PERIOD = 10
+        self.SAVE_PERIOD = 30
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.SHUFFLE_BATCH = True
         self.NUM_PREPROCESSING_THREADS = 16

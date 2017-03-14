@@ -18,8 +18,9 @@ with tf.Graph().as_default():
     prediction = model.inference(x=training_set_x)
     loss = trainer.loss(logits=prediction, labels=training_set_y)
     accuracy = trainer.accuracy(logits=prediction, labels=training_set_y)
-    train_op = trainer.train(total_loss=loss, global_step=tf.contrib.framework.get_or_create_global_step(), NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN=17000)  # TODO get real number of examples
+    train_op = trainer.train(loss=loss, global_step=tf.contrib.framework.get_or_create_global_step(), NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN=17000)  # TODO get real number of examples
 
+    # saver = tf.train.Saver()
     # sess = tf.Session()
     #
     # init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -44,7 +45,7 @@ with tf.Graph().as_default():
         def before_run(self, run_context):
             self._step += 1
             self._start_time = time.time()
-            return tf.train.SessionRunArgs({'loss': loss, 'accuracy': accuracy})  # Asks for loss value. TODO ask for accuracy value as well
+            return tf.train.SessionRunArgs({'loss': loss, 'accuracy': accuracy})  # Asks for loss accuracy value.
 
         def after_run(self, run_context, run_values):
             duration = time.time() - self._start_time
@@ -67,7 +68,8 @@ with tf.Graph().as_default():
                    tf.train.NanTensorHook(loss),
                    tf.train.NanTensorHook(accuracy),
                    _LoggerHook()],
-            save_summaries_steps=10,
+            save_checkpoint_secs=config.SAVE_PERIOD,
+            save_summaries_steps=config.LOG_PERIOD,
             config=tf.ConfigProto(
                 log_device_placement=False)) as mon_sess:
         while not mon_sess.should_stop():
