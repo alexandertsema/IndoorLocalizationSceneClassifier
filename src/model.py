@@ -9,7 +9,7 @@ class Model:
 
     def inference_(self, x, mode_name):
         with tf.name_scope('inputs'):
-            # image = tf.reshape(x, [-1, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.CHANNELS])
+            # x = tf.reshape(x, [-1, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.CHANNELS])
             # tf.summary.image('example_{}'.format(mode_name), image, 4)
             x = tf.reshape(x, [-1, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS])
 

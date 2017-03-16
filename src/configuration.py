@@ -39,7 +39,7 @@ class Configuration(object):
         output params
         """
         self.OUTPUT_PATH = '/home/alex/PycharmProjects/IndoorLocalizationSceneClassifier/runs/out_'
-        self.OUTPUT_PATH = '/media/alex/My Passport/0_alex_runs/out_'
+        # self.OUTPUT_PATH = '/media/alex/My Passport/0_alex_runs/out_'
 
         """
         modes
@@ -66,7 +66,7 @@ class Configuration(object):
         self.NUM_PREPROCESSING_THREADS = 16
         self.NUM_EPOCHS_PER_DECAY = 1  # Epochs after which learning rate decays.
         self.LEARNING_RATE_DECAY_FACTOR = 0.005  # 0.005  # Learning rate decay factor.
-        self.INITIAL_LEARNING_RATE = 0.1  # 0.001 # Initial learning rate.
+        self.INITIAL_LEARNING_RATE = 0.001  # 0.001 # Initial learning rate.
         self.END_LEARNING_RATE = 0.00001  # for polynomial lr decay only
 
         """
