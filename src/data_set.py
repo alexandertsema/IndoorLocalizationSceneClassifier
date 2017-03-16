@@ -12,9 +12,9 @@ class DataSet(object):
         pass
 
     def get_data_sets(self):
-        training_set_x,  training_set_y = self.read_tf_records_file('training_set')
-        validation_set_x, validation_set_y = self.read_tf_records_file('validation_set')
-        testing_set_x, testing_set_y = self.read_tf_records_file('testing_set')
+        training_set_x,  training_set_y, training_size = self.read_tf_records_file('training_set')
+        validation_set_x, validation_set_y, validation_size = self.read_tf_records_file('validation_set')
+        testing_set_x, testing_set_y, testing_size = self.read_tf_records_file('testing_set')
 
         if training_set_x is None or validation_set_x is None or testing_set_x is None\
                 or training_set_y is None or validation_set_y is None or testing_set_y is None:
@@ -34,13 +34,17 @@ class DataSet(object):
             converter.convert_to_tf_records(testing_inputs, 'testing_set')
             self.get_data_sets()
 
-        return training_set_x, training_set_y, validation_set_x, validation_set_y, testing_set_x, testing_set_y
+        # self.config.VALIDATION_SIZE = validation_size
+        # self.config.TESTING_SIZE = testing_size
+        # self.config.TRAINING_SIZE = training_size
+
+        return training_set_x, training_set_y, training_size, validation_set_x, validation_set_y, validation_size, testing_set_x, testing_set_y, testing_size
 
     def read_tf_records_file(self, name):
         filename = os.path.join(self.config.DATA_SET_PATH, name + '.tfrecords')
 
         if not os.path.exists(filename):
-            return None, None
+            return None, None, -1
 
         with tf.name_scope('input'):
             print()
@@ -62,7 +66,7 @@ class DataSet(object):
                 # Ensures a minimum amount of shuffling of examples.
                 min_after_dequeue=1000)
 
-            return images, sparse_labels
+            return images, sparse_labels, -1
 
     def read_and_decode(self, filename_queue):
         reader = tf.TFRecordReader()
@@ -73,11 +77,9 @@ class DataSet(object):
             features={
                 'image_raw': tf.FixedLenFeature([], tf.string),
                 'label':     tf.FixedLenFeature([], tf.int64),
+                #'size':      tf.FixedLenFeature([], tf.int64)
             })
-        from tensorflow.examples.tutorials.mnist import mnist
-        # Convert from a scalar string tensor (whose single string has
-        # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
-        # [mnist.IMAGE_PIXELS].
+
         image = tf.decode_raw(features['image_raw'], tf.uint8)
         image.set_shape([self.config.IMAGE_SIZE.WIDTH * self.config.IMAGE_SIZE.HEIGHT * self.config.IMAGE_SIZE.CHANNELS])
 
@@ -92,4 +94,6 @@ class DataSet(object):
         # Convert label from a scalar uint8 tensor to an int32 scalar.
         label = tf.cast(features['label'], tf.int32)
 
-        return image, label
+        #size = tf.cast(features['size'], tf.int32)
+
+        return image, label, #size

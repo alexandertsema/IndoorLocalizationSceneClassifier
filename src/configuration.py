@@ -5,8 +5,8 @@ class Configuration(object):
         inputs params
         """
 
-        self.PATH = "/home/alex/Documents/Project/SceneClassifier/data"
-        self.DATA_SET_PATH = "/home/alex/PycharmProjects/Project/data"
+        self.PATH = "/home/alex/Documents/Project/labeled_data"
+        self.DATA_SET_PATH = "/home/alex/PycharmProjects/IndoorLocalizationSceneClassifier/data"
         self.CLASSES = {
             'Bathroom': 0,
             'Doors': 1,
@@ -22,19 +22,36 @@ class Configuration(object):
         self.TESTING_PERC = 0.1
         self.TRAINING_PERC = 1 - self.VALIDATION_PERC - self.TESTING_PERC
 
+        self.VALIDATION_SIZE = 0
+        self.TESTING_SIZE = 0
+        self.TRAINING_SIZE = 0
+
         class Size(object):
             def __init__(self, width, height, channels):
                 self.WIDTH = width
                 self.HEIGHT = height
                 self.CHANNELS = channels
-            pass
+                pass
 
         self.IMAGE_SIZE = Size(268, 32, 3)
 
         """
         output params
         """
-        self.OUTPUT_PATH = 'out'
+        self.OUTPUT_PATH = '/home/alex/PycharmProjects/IndoorLocalizationSceneClassifier/runs/out_'
+        self.OUTPUT_PATH = '/media/alex/My Passport/0_alex_runs/out_'
+
+        """
+        modes
+        """
+        class Mode(object):
+            def __init__(self):
+                self.TRAINING = 'training'
+                self.VALIDATION = 'validation'
+                self.TESTING = 'testing'
+                pass
+
+        self.MODE = Mode()
 
         """
         training params
@@ -43,12 +60,18 @@ class Configuration(object):
         self.BATCH_SIZE = 128
         self.EPOCHS = 1000
         self.STEPS = 10000
-        self.LOG_PERIOD = 10
-        self.SAVE_PERIOD = 30
+        self.LOG_PERIOD = 10  # steps
+        self.SAVE_PERIOD = 1000  # seconds
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
-        self.SHUFFLE_BATCH = True
         self.NUM_PREPROCESSING_THREADS = 16
-        self.MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
-        self.NUM_EPOCHS_PER_DECAY = 10  # Epochs after which learning rate decays.
-        self.LEARNING_RATE_DECAY_FACTOR = 0.01  # Learning rate decay factor.
-        self.INITIAL_LEARNING_RATE = 0.1  # Initial learning rate.
+        self.NUM_EPOCHS_PER_DECAY = 1  # Epochs after which learning rate decays.
+        self.LEARNING_RATE_DECAY_FACTOR = 0.005  # 0.005  # Learning rate decay factor.
+        self.INITIAL_LEARNING_RATE = 0.1  # 0.001 # Initial learning rate.
+        self.END_LEARNING_RATE = 0.00001  # for polynomial lr decay only
+
+        """
+        evaluation params
+        """
+
+        self.VALIDATION_PERIOD = 100  # steps
+        self.TESTING_PERIOD = 1000  # steps

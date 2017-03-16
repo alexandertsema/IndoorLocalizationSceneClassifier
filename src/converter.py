@@ -33,6 +33,7 @@ class Converter:
                 'width':     self._int64_feature(cols),
                 'depth':     self._int64_feature(depth),
                 'label':     self._int64_feature(int(labels[index])),
+                #'size':      self._int64_feature(num_examples),
                 'image_raw': self._bytes_feature(image_raw)}))
             writer.write(example.SerializeToString())
         writer.close()
