@@ -24,7 +24,7 @@ class Training:
 
         tf.summary.scalar('learning_rate', lr)
 
-        with tf.name_scope('optimizer'):
+        with tf.variable_scope('optimizer'):
             optimizer = tf.train.AdamOptimizer(lr)
             train_op = optimizer.minimize(loss=loss, global_step=global_step)
 

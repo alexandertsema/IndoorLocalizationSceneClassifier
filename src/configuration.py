@@ -57,14 +57,14 @@ class Configuration(object):
         training params
         """
 
-        self.BATCH_SIZE = 128
-        self.EPOCHS = 1000
+        self.BATCH_SIZE = 256
+        self.EPOCHS = 100
         self.STEPS = 10000
         self.LOG_PERIOD = 10  # steps
         self.SAVE_PERIOD = 1000  # seconds
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.NUM_PREPROCESSING_THREADS = 16
-        self.NUM_EPOCHS_PER_DECAY = 1  # Epochs after which learning rate decays.
+        self.NUM_EPOCHS_PER_DECAY = 10  # Epochs after which learning rate decays.
         self.LEARNING_RATE_DECAY_FACTOR = 0.005  # 0.005  # Learning rate decay factor.
         self.INITIAL_LEARNING_RATE = 0.001  # 0.001 # Initial learning rate.
         self.END_LEARNING_RATE = 0.00001  # for polynomial lr decay only
@@ -73,5 +73,5 @@ class Configuration(object):
         evaluation params
         """
 
-        self.VALIDATION_PERIOD = 100  # steps
-        self.TESTING_PERIOD = 1000  # steps
+        self.VALIDATION_PERIOD = 30  # steps
+        self.TESTING_PERIOD = 50  # steps
