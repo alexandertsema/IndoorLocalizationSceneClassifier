@@ -5,6 +5,8 @@ from tensorlayer import activation
 class Model:
     def __init__(self, config):
         self.config = config
+        self.initial_weight_deviation = 0.01
+        self.leaky_relu_leakiness = 0.001
         pass
 
     def inference_(self, x, mode_name):
@@ -31,9 +33,15 @@ class Model:
         with tf.variable_scope('max_pooling_3'):
             max_pooling_3 = tf.layers.max_pooling2d(inputs=convolution_3, pool_size=[2, 2], strides=2)
 
+        with tf.variable_scope('convolution_4'):
+            convolution_4 = tf.layers.conv2d(inputs=max_pooling_3, filters=512, kernel_size=[5, 5], padding="same", activation=activation.lrelu)
+
+        with tf.variable_scope('max_pooling_4'):
+            max_pooling_4 = tf.layers.max_pooling2d(inputs=convolution_4, pool_size=[2, 2], strides=2)
+
         with tf.variable_scope('dense_1'):
-            max_pooling_3 = tf.reshape(max_pooling_3, [max_pooling_3.shape[0].value, max_pooling_3.shape[1].value * max_pooling_3.shape[2].value * max_pooling_3.shape[3].value])
-            dense_1 = tf.layers.dense(inputs=max_pooling_3, units=512, activation=activation.lrelu)
+            max_pooling_3 = tf.reshape(max_pooling_4, [max_pooling_4.shape[0].value, max_pooling_4.shape[1].value * max_pooling_4.shape[2].value * max_pooling_4.shape[3].value])
+            dense_1 = tf.layers.dense(inputs=max_pooling_3, units=1024, activation=activation.lrelu)
 
         with tf.variable_scope('logits'):
             logits = tf.layers.dense(inputs=dense_1, units=self.config.NUM_CLASSES, activation=activation.lrelu)
@@ -42,4 +50,5 @@ class Model:
         tf.summary.histogram('classes_prob_distribution_prediction_{}'.format(mode_name), tf.nn.softmax(logits=logits))
 
         return logits
+
 

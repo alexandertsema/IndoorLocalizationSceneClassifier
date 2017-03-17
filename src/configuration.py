@@ -73,5 +73,5 @@ class Configuration(object):
         evaluation params
         """
 
-        self.VALIDATION_PERIOD = 30  # steps
-        self.TESTING_PERIOD = 50  # steps
+        self.VALIDATION_PERIOD = 100  # steps
+        self.TESTING_PERIOD = 500  # steps
