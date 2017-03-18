@@ -60,7 +60,7 @@ class Configuration(object):
         self.BATCH_SIZE = 256
         self.EPOCHS = 100
         self.STEPS = 10000
-        self.LOG_PERIOD = 10  # steps
+        self.LOG_PERIOD = 20  # steps
         self.SAVE_PERIOD = 1000  # seconds
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.NUM_PREPROCESSING_THREADS = 16
