@@ -39,7 +39,6 @@ class Configuration(object):
         output params
         """
         self.OUTPUT_PATH = '/home/alex/PycharmProjects/IndoorLocalizationSceneClassifier/runs/out_'
-        # self.OUTPUT_PATH = '/media/alex/My Passport/0_alex_runs/out_'
 
         """
         modes
@@ -57,17 +56,17 @@ class Configuration(object):
         training params
         """
 
-        self.BATCH_SIZE = 256
+        self.BATCH_SIZE = 128
         self.EPOCHS = 100
-        self.STEPS = 10000
-        self.LOG_PERIOD = 20  # steps
-        self.SAVE_PERIOD = 1000  # seconds
+        # self.STEPS = int(self.TRAINING_SIZE / self.BATCH_SIZE)
+        self.LOG_PERIOD = 10  # steps
+        self.SAVE_PERIOD = 500  # steps
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.NUM_PREPROCESSING_THREADS = 16
         self.NUM_EPOCHS_PER_DECAY = 10  # Epochs after which learning rate decays.
-        self.LEARNING_RATE_DECAY_FACTOR = 0.005  # 0.005  # Learning rate decay factor.
         self.INITIAL_LEARNING_RATE = 0.001  # 0.001 # Initial learning rate.
-        self.END_LEARNING_RATE = 0.00001  # for polynomial lr decay only
+        self.LEARNING_RATE_DECAY_FACTOR = 0.1  # 0.005  # Learning rate decay factor.
+        self.TARGET_LOSS = 0.07
 
         """
         evaluation params
@@ -75,3 +74,12 @@ class Configuration(object):
 
         self.VALIDATION_PERIOD = 100  # steps
         self.TESTING_PERIOD = 500  # steps
+
+        """
+        testing params
+        """
+
+        self.TESTING_BATCH_SIZE = 1
+        self.TESTING_EPOCHS = 1
+
+

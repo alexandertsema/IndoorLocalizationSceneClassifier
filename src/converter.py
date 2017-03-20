@@ -33,10 +33,15 @@ class Converter:
                 'width':     self._int64_feature(cols),
                 'depth':     self._int64_feature(depth),
                 'label':     self._int64_feature(int(labels[index])),
-                #'size':      self._int64_feature(num_examples),
                 'image_raw': self._bytes_feature(image_raw)}))
             writer.write(example.SerializeToString())
         writer.close()
+        if not os.path.exists(os.path.join(self.config.DATA_SET_PATH, 'meta')):
+            meta = open(os.path.join(self.config.DATA_SET_PATH, 'meta'), "w+")
+            meta.close()
+        with open(os.path.join(self.config.DATA_SET_PATH, 'meta'), "a") as f:
+            f.write('{}-{}\n'.format(name, num_examples))
+            f.close()
         print()
         pass
 

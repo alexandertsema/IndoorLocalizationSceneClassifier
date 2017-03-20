@@ -15,7 +15,7 @@ class Evaluation:
     def loss(self, predictions, labels, mode_name):  # Calculate the average cross entropy loss across the batch.
         with tf.variable_scope('one_hot_labels'):
             one_hot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=self.config.NUM_CLASSES)
-        tf.summary.histogram('one_hot_labels_{}'.format(mode_name), one_hot_labels)
+        # tf.summary.histogram('one_hot_labels_{}'.format(mode_name), one_hot_labels)
         with tf.variable_scope('loss_function_{}'.format(mode_name)):
             loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=predictions)
 

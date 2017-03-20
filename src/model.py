@@ -8,10 +8,14 @@ class Model:
     def __init__(self, config):
         self.config = config
         self.initial_weight_deviation = 0.01
-        self.leaky_relu_leakiness = 0.001
+        self.leaky_relu_leakiness = 0.1
         pass
 
-    def inference_(self, x, mode_name):
+    def inference(self, x, mode_name):
+        histogram_summary = False if mode_name == self.config.MODE.VALIDATION else True
+        kernel_image_summary = False if mode_name == self.config.MODE.VALIDATION else True
+        activation_image_summary = False if mode_name == self.config.MODE.VALIDATION else True
+
         with tf.name_scope('inputs'):
             x = tf.reshape(x, [-1, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS])
 
@@ -22,9 +26,9 @@ class Model:
                                             depth_in=self.config.IMAGE_SIZE.CHANNELS,
                                             depth_out=64,
                                             mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=True,
-                                            activation_image_summary=True)
+                                            histogram_summary=histogram_summary,
+                                            kernel_image_summary=kernel_image_summary,
+                                            activation_image_summary=activation_image_summary)
 
         with tf.variable_scope('max_pooling1'):
             max_pooling_1 = tf.layers.max_pooling2d(inputs=convolution_1, pool_size=[2, 2], strides=2)
@@ -34,9 +38,9 @@ class Model:
                                             depth_in=64,
                                             depth_out=128,
                                             mode_name=mode_name,
-                                            histogram_summary=True,
+                                            histogram_summary=histogram_summary,
                                             kernel_image_summary=False,
-                                            activation_image_summary=True)
+                                            activation_image_summary=activation_image_summary)
 
         with tf.variable_scope('max_pooling2'):
             max_pooling_2 = tf.layers.max_pooling2d(inputs=convolution_2, pool_size=[2, 2], strides=2)
@@ -46,9 +50,9 @@ class Model:
                                             depth_in=128,
                                             depth_out=256,
                                             mode_name=mode_name,
-                                            histogram_summary=True,
+                                            histogram_summary=histogram_summary,
                                             kernel_image_summary=False,
-                                            activation_image_summary=True)
+                                            activation_image_summary=activation_image_summary)
 
         with tf.variable_scope('max_pooling3'):
             max_pooling_3 = tf.layers.max_pooling2d(inputs=convolution_3, pool_size=[2, 2], strides=2)
@@ -58,9 +62,9 @@ class Model:
                                             depth_in=256,
                                             depth_out=512,
                                             mode_name=mode_name,
-                                            histogram_summary=True,
+                                            histogram_summary=histogram_summary,
                                             kernel_image_summary=False,
-                                            activation_image_summary=True)
+                                            activation_image_summary=activation_image_summary)
 
         with tf.variable_scope('max_pooling4'):
             max_pooling_4 = tf.layers.max_pooling2d(inputs=convolution_4, pool_size=[2, 2], strides=2)
@@ -69,15 +73,19 @@ class Model:
             max_pooling_3 = tf.reshape(max_pooling_4, [max_pooling_4.shape[0].value, max_pooling_4.shape[1].value * max_pooling_4.shape[2].value * max_pooling_4.shape[3].value])
             dense_1 = tf.layers.dense(inputs=max_pooling_3, units=1024, activation=activation.lrelu)
 
+        if mode_name == self.config.MODE.TRAINING:
+            tf.summary.histogram('dense1'.format(mode_name), dense_1)
+
         with tf.variable_scope('logits'):
             logits = tf.layers.dense(inputs=dense_1, units=self.config.NUM_CLASSES, activation=activation.lrelu)
 
-        tf.summary.histogram('rawlogits_{}'.format(mode_name), logits)
-        tf.summary.histogram('classesprobdistributionprediction_{}'.format(mode_name), tf.nn.softmax(logits=logits))
+        if mode_name == self.config.MODE.TRAINING:
+            tf.summary.histogram('logits', logits)
+            tf.summary.histogram('softmax', tf.nn.softmax(logits=logits))
 
         return logits
 
-    def inference(self, x, mode_name):
+    def inference_(self, x, mode_name):
         with tf.name_scope('inputs'):
             x = tf.reshape(x, [-1, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS])
 
@@ -160,7 +168,7 @@ class Model:
         weights = tf.get_variable("weights", [kernel_height, kernel_width, depth_in, depth_out], initializer=tf.truncated_normal_initializer(stddev=0.01))
         biases = tf.get_variable("biases", [depth_out], initializer=tf.constant_initializer(0.01))
         convolutions = self._conv2d(input_tensor, weights, strides=strides)
-        activations = activation_fn(convolutions + biases)
+        activations = activation_fn(convolutions + biases, self.leaky_relu_leakiness)
 
         if histogram_summary:
             tf.summary.histogram(mode_name + '_weights', weights)

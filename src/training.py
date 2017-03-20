@@ -17,11 +17,6 @@ class Training:
                                         decay_rate=self.config.LEARNING_RATE_DECAY_FACTOR,
                                         staircase=True)
 
-        # lr = tf.train.polynomial_decay(learning_rate=self.config.INITIAL_LEARNING_RATE,
-        #                                global_step=global_step,
-        #                                decay_steps=decay_steps,
-        #                                end_learning_rate=self.config.END_LEARNING_RATE)
-
         tf.summary.scalar('learning_rate', lr)
 
         with tf.variable_scope('optimizer'):
