@@ -2,7 +2,7 @@ class Configuration(object):
     def __init__(self):
 
         """
-        inputs params
+        dataset params
         """
 
         self.PATH = "/home/alex/Documents/Project/labeled_data"
@@ -17,14 +17,10 @@ class Configuration(object):
             'LongCorridor': 6,
             'Windows': 7
         }
-        self.NUM_CLASSES = self.CLASSES.__len__()
+        self.NUM_CLASSES = len(self.CLASSES)
         self.VALIDATION_PERC = 0.2
         self.TESTING_PERC = 0.1
         self.TRAINING_PERC = 1 - self.VALIDATION_PERC - self.TESTING_PERC
-
-        self.VALIDATION_SIZE = 0
-        self.TESTING_SIZE = 0
-        self.TRAINING_SIZE = 0
 
         class Size(object):
             def __init__(self, width, height, channels):

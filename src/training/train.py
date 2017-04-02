@@ -10,6 +10,7 @@ from tensorflow.python.framework.errors_impl import OutOfRangeError
 from data.data_set import DataSet
 from evaluation.evaluation import Evaluation
 from helpers.configuration import Configuration
+from helpers.sessions import Sessions
 from model.cnn import Cnn
 from training.training import Training
 
@@ -37,6 +38,7 @@ def train(session_name=None):
         train_op = trainer.train(loss=loss_training, global_step=global_step_tensor, num_examples_per_epoch_for_train=data_set.training_set.size)
 
         tf.get_variable_scope().reuse_variables()
+
         #   validation
         predictions_validation = model.inference(x=data_set.validation_set.x, mode_name=config.MODE.VALIDATION)
         loss_validation = evaluation.loss(predictions=predictions_validation, labels=data_set.validation_set.y, mode_name=config.MODE.VALIDATION)
@@ -46,31 +48,24 @@ def train(session_name=None):
         merged = tf.summary.merge_all()
         saver = tf.train.Saver()
 
-        model_path = config.OUTPUT_PATH + session_name + '/' + 'model.ckpt'
-
         print('Starting session...')
         with tf.Session() as sess:
-
+            summary_writer = tf.summary.FileWriter(config.OUTPUT_PATH + session_name, sess.graph)
             sess.run(init_op)
-
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            sessions_helper = Sessions(config=config, session=sess, saver=saver, session_name=session_name, summary_writer=summary_writer, coordinator=coord, threads=threads)
+            sessions_helper.restore()
 
-            if os.path.exists(config.OUTPUT_PATH + session_name):
-                checkpoint = tf.train.get_checkpoint_state(config.OUTPUT_PATH + session_name)
-                saver.restore(sess, checkpoint.model_checkpoint_path)
-                print("Model restored from: %s" % checkpoint.model_checkpoint_path)
-
-            summary_writer = tf.summary.FileWriter(config.OUTPUT_PATH + session_name, sess.graph)
             global_step = 0
             epoch = 0
             step = 0
             start_time = datetime.now()
-            print('Starting training with {} epochs {} steps each...'.format(config.EPOCHS, int(data_set.training_set.size / config.BATCH_SIZE)))#config.STEPS))
+            print('Starting training with {} epochs {} steps each...'.format(config.EPOCHS, int(data_set.training_set.size / config.BATCH_SIZE)))
             print()
             try:
                 for epoch in range(config.EPOCHS):
-                    for step in range(int(data_set.training_set.size / config.BATCH_SIZE)):#range(config.STEPS):
+                    for step in range(int(data_set.training_set.size / config.BATCH_SIZE)):
                         start_time_op = time.time()
                         _, summary, loss_training_value, accuracy_training_value = sess.run([train_op, merged, loss_training, accuracy_training])
                         duration = time.time() - start_time_op
@@ -81,29 +76,17 @@ def train(session_name=None):
                             summary_writer.add_summary(summary, global_step)
 
                         if global_step == 1 or global_step % config.SAVE_PERIOD == 0:  # save model
-                            if not os.path.exists(config.OUTPUT_PATH + session_name):
-                                os.makedirs(config.OUTPUT_PATH + session_name)
-                            saver.save(sess=sess, save_path=model_path, global_step=global_step_tensor)
-                            print("Model saved as: %s" % model_path)
+                            sessions_helper.save(global_step_tensor=global_step_tensor, message='Initial saving...')
 
                         if math.isnan(loss_training_value):
                             print("loss is NaN, breaking training...")
                             exit(-1)
 
                         if loss_training_value <= config.TARGET_LOSS:  # early stop with good results
-                            print('Model reached {} witch is less than target loss, saving model...'.format(loss_training_value))
-                            saver.save(sess=sess, save_path=model_path, global_step=global_step_tensor)
-                            print("model saved as: %s" % model_path)
 
-                            print("releasing resources...")
+                            sessions_helper.save(global_step_tensor=global_step_tensor, message='Model reached {} witch is less than target loss, saving model...'.format(loss_training_value))
 
-                            summary_writer.close()
-                            print("summary writer closed")
-                            sess.close()
-                            print("session closed")
-
-                            print("resources released...")
-                            print("end")
+                            sessions_helper.end()
 
                             return session_name
 
@@ -111,46 +94,19 @@ def train(session_name=None):
                     loss_validation_value, accuracy_validation_value = sess.run([loss_validation, accuracy_validation])
                     logger.log(global_step=global_step, epoch=epoch+1, step=step+1, duration=1, loss=loss_validation_value, accuracy=accuracy_validation_value, mode=config.MODE.VALIDATION)
 
-            except OutOfRangeError:
-                print('OutOfRangeError occurred, saving model...')
-                saver.save(sess=sess, save_path=model_path, global_step=global_step_tensor)
-                print("model saved as: %s" % model_path)
-
-                print("restarting training...")
-
+                sessions_helper.save(global_step_tensor=global_step_tensor, message='OutOfRangeError occurred, saving model...')
+                print("Restarting training...")
                 train(session_name)
 
             except KeyboardInterrupt:
-                print('User requested to stop training, saving model...')
-                saver.save(sess=sess, save_path=model_path, global_step=global_step_tensor)
-                print("model saved as: %s" % model_path)
 
-                print("releasing resources...")
+                sessions_helper.save(global_step_tensor=global_step_tensor, message='User requested to stop training, saving model...')
+                sessions_helper.end()
 
-                summary_writer.close()
-                print("summary writer closed")
-                sess.close()
-                print("session closed")
+                return session_name
 
-                print("resources released...")
-                print("end")
-
-                exit()
-
-            print("training finished in {}, saving model...".format(datetime.now() - start_time))
-
-            saver.save(sess=sess, save_path=model_path, global_step=global_step_tensor)
-            print("model saved as: %s" % model_path)
-
-            print("releasing resources...")
-
-            summary_writer.close()
-            print("summary writer closed")
-            sess.close()
-            print("session closed")
-
-            print("resources released...")
-            print("end")
+            sessions_helper.save(global_step_tensor=global_step_tensor, message="Training finished in {}, saving model...".format(datetime.now() - start_time))
+            sessions_helper.end()
 
             return session_name
 
