@@ -1,15 +1,17 @@
+import math
 import os
 import time
-import math
 from datetime import datetime
-from tensorflow.python.framework.errors_impl import OutOfRangeError
-from configuration import Configuration
-from data_set import DataSet
+
 import tensorflow as tf
-from evaluation import Evaluation
-from log import Logger
-from model import Model
-from training import Training
+from helpers.log import Logger
+from tensorflow.python.framework.errors_impl import OutOfRangeError
+
+from data.data_set import DataSet
+from evaluation.evaluation import Evaluation
+from helpers.configuration import Configuration
+from model.cnn import Cnn
+from training.training import Training
 
 
 def train(session_name=None):
@@ -18,7 +20,7 @@ def train(session_name=None):
 
     config = Configuration()  # general settings
     data_sets = DataSet(config)  # data sets retrieval
-    model = Model(config)  # model builder
+    model = Cnn(config)  # model builder
     trainer = Training(config)  # training ops
     evaluation = Evaluation(config)  # evaluation ops
     logger = Logger(config)

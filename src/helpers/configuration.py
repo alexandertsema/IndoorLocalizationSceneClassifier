@@ -53,20 +53,24 @@ class Configuration(object):
         self.MODE = Mode()
 
         """
+        model params
+        """
+        self.LEAKY_RELU_ALPHA = 0.1
+
+        """
         training params
         """
 
         self.BATCH_SIZE = 128
         self.EPOCHS = 100
-        # self.STEPS = int(self.TRAINING_SIZE / self.BATCH_SIZE)
         self.LOG_PERIOD = 10  # steps
         self.SAVE_PERIOD = 500  # steps
         self.MIN_FRACTION_OF_EXAMPLES_IN_QUEUE = 0.4
         self.NUM_PREPROCESSING_THREADS = 16
         self.NUM_EPOCHS_PER_DECAY = 10  # Epochs after which learning rate decays.
-        self.INITIAL_LEARNING_RATE = 0.001  # 0.001 # Initial learning rate.
-        self.LEARNING_RATE_DECAY_FACTOR = 0.1  # 0.005  # Learning rate decay factor.
-        self.TARGET_LOSS = 0.07
+        self.INITIAL_LEARNING_RATE = 0.001
+        self.LEARNING_RATE_DECAY_FACTOR = 0.1
+        self.TARGET_LOSS = 0.075
 
         """
         evaluation params

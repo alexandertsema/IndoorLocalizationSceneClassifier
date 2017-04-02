@@ -1,5 +1,5 @@
-from test import test
-from train import train
+from evaluation.test import test
+from training.train import train
 
 session_name = train()
 test(session_name)

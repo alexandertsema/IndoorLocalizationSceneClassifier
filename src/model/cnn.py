@@ -4,11 +4,9 @@ from math import *
 import matplotlib.pyplot as plt
 
 
-class Model:
+class Cnn:
     def __init__(self, config):
         self.config = config
-        self.initial_weight_deviation = 0.01
-        self.leaky_relu_leakiness = 0.1
         pass
 
     def inference(self, x, mode_name):
@@ -85,80 +83,6 @@ class Model:
 
         return logits
 
-    def inference_(self, x, mode_name):
-        with tf.name_scope('inputs'):
-            x = tf.reshape(x, [-1, self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS])
-
-        tf.summary.image("/inputs", x, max_outputs=4)
-
-        with tf.variable_scope('convolution1'):
-            convolution_1 = self.conv_layer(input_tensor=x,
-                                            depth_in=self.config.IMAGE_SIZE.CHANNELS,
-                                            depth_out=96,
-                                            kernel_height=9, kernel_width=9,
-                                            mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=True,
-                                            activation_image_summary=True)
-
-        with tf.variable_scope('max_pooling1'):
-            max_pooling_1 = tf.layers.max_pooling2d(inputs=convolution_1, pool_size=[2, 2], strides=2)
-
-        with tf.variable_scope('convolution2'):
-            convolution_2 = self.conv_layer(input_tensor=max_pooling_1,
-                                            depth_in=96,
-                                            depth_out=256,
-                                            kernel_height=5, kernel_width=5,
-                                            mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=False,
-                                            activation_image_summary=True)
-
-        with tf.variable_scope('max_pooling2'):
-            max_pooling_2 = tf.layers.max_pooling2d(inputs=convolution_2, pool_size=[2, 2], strides=2)
-
-        with tf.variable_scope('convolution3'):
-            convolution_3 = self.conv_layer(input_tensor=max_pooling_2,
-                                            depth_in=256,
-                                            depth_out=384,
-                                            mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=False,
-                                            activation_image_summary=True)
-
-        with tf.variable_scope('convolution4'):
-            convolution_4 = self.conv_layer(input_tensor=convolution_3,
-                                            depth_in=384,
-                                            depth_out=384,
-                                            mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=False,
-                                            activation_image_summary=True)
-
-        with tf.variable_scope('convolution5'):
-            convolution_5 = self.conv_layer(input_tensor=convolution_4,
-                                            depth_in=384,
-                                            depth_out=256,
-                                            mode_name=mode_name,
-                                            histogram_summary=True,
-                                            kernel_image_summary=False,
-                                            activation_image_summary=True)
-
-        with tf.variable_scope('dense1'):
-            convolution_5_reshaped = tf.reshape(convolution_5, [convolution_5.shape[0].value, convolution_5.shape[1].value * convolution_5.shape[2].value * convolution_5.shape[3].value])
-            dense_1 = tf.layers.dense(inputs=convolution_5_reshaped, units=512, activation=activation.lrelu)
-
-        with tf.variable_scope('dense2'):
-            dense_2 = tf.layers.dense(inputs=dense_1, units=512, activation=activation.lrelu)
-
-        with tf.variable_scope('logits'):
-            logits = tf.layers.dense(inputs=dense_2, units=self.config.NUM_CLASSES, activation=activation.lrelu)
-
-        tf.summary.histogram('rawlogits_{}'.format(mode_name), logits)
-        tf.summary.histogram('classesprobdistributionprediction_{}'.format(mode_name), tf.nn.softmax(logits=logits))
-
-        return logits
-
     def _conv2d(self, x, weights, strides):
         return tf.nn.conv2d(x, weights, strides=strides, padding='SAME')
 
@@ -168,14 +92,14 @@ class Model:
         weights = tf.get_variable("weights", [kernel_height, kernel_width, depth_in, depth_out], initializer=tf.truncated_normal_initializer(stddev=0.01))
         biases = tf.get_variable("biases", [depth_out], initializer=tf.constant_initializer(0.01))
         convolutions = self._conv2d(input_tensor, weights, strides=strides)
-        activations = activation_fn(convolutions + biases, self.leaky_relu_leakiness)
+        activations = activation_fn(convolutions + biases, self.config.LEAKY_RELU_ALPHA)
 
         if histogram_summary:
             tf.summary.histogram(mode_name + '_weights', weights)
             tf.summary.histogram(mode_name + '_activations', activations)
 
         if kernel_image_summary:
-            weights_image_grid = self.put_kernels_on_grid(kernel=weights)
+            weights_image_grid = self.kernels_image_grid(kernel=weights)
             tf.summary.image(mode_name + '/features', weights_image_grid, max_outputs=1)
 
         if activation_image_summary:
@@ -184,18 +108,28 @@ class Model:
 
         return activations
 
+    def activation_image(self, activations, images_number=4):
+        images = activations[0:self.config.IMAGE_SIZE.CHANNELS, :, :, 0:images_number]
+        images = tf.transpose(images, perm=[3, 1, 2, 0])
+        padding = 4
+        images = tf.pad(images, tf.constant([[0, 0], [int(padding/2), int(padding/2)], [padding, padding], [0, 0]]), mode='CONSTANT')
+        list_images = tf.split(axis=0, num_or_size_splits=4, value=images)
+
+        activated_images = tf.concat(axis=1, values=list_images)
+
+        return activated_images
+
     @staticmethod
-    def put_kernels_on_grid(kernel, pad=1):  # 1st layer only
+    def kernels_image_grid(kernel, pad=1):  # 1st layer only
         # get shape of the grid. NumKernels == grid_Y * grid_X
         def factorization(n):
             for i in range(int(sqrt(float(n))), 0, -1):
                 if n % i == 0:
                     if i == 1:
                         print('Who would enter a prime number of filters')
-                    return (i, int(n / i))
+                    return i, int(n / i)
 
         (grid_Y, grid_X) = factorization(kernel.get_shape()[3].value)
-        # print('grid: %d = (%d, %d)' % (kernel.get_shape()[3].value, grid_Y, grid_X))
 
         x_min = tf.reduce_min(kernel)
         x_max = tf.reduce_max(kernel)
@@ -228,17 +162,4 @@ class Model:
         #   where in this case batch_size == 1
         x7 = tf.transpose(x6, (3, 0, 1, 2))
 
-        # scaling to [0, 255] is not necessary for tensorboard
         return x7
-
-    @staticmethod
-    def activation_image(activations):
-        layer1_image1 = activations[0:3, :, :, 0:4]  # 4 - number images to show, 3 - number channels
-        layer1_image1 = tf.transpose(layer1_image1, perm=[3, 1, 2, 0])
-        padding = 4
-        layer1_image1 = tf.pad(layer1_image1, tf.constant([[0, 0], [int(padding/2), int(padding/2)], [padding, padding], [0, 0]]), mode='CONSTANT')
-        list_lc1 = tf.split(axis=0, num_or_size_splits=4, value=layer1_image1)
-
-        layer_combine_1 = tf.concat(axis=1, values=list_lc1)
-
-        return layer_combine_1
