@@ -1,6 +1,7 @@
 import tensorflow as tf
 from math import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Visualization:
@@ -64,5 +65,24 @@ class Visualization:
 
         return x7
 
-    def show_example(self):
+    def show_example(self, predicted_label, actual_label, example_image, is_correct_result):
+        example_class_predicted = self.get_example_class(predicted_label, self.config.CLASSES)
+        example_class_actual = self.get_example_class(actual_label, self.config.CLASSES)
+        example_image = np.reshape(np.array(example_image), (self.config.IMAGE_SIZE.HEIGHT, self.config.IMAGE_SIZE.WIDTH, self.config.IMAGE_SIZE.CHANNELS))
+
+        print()
+        print('Predicted as {}, actually is {}. {}'.format(example_class_predicted, example_class_actual, is_correct_result))
+
+        plt.imshow(example_image)
+        plt.show()
+
         pass
+
+    @staticmethod
+    def get_example_class(label, classes):
+        example_category = None
+        for k, v in classes.items():
+            if v == label:
+                example_category = k
+                break
+        return example_category

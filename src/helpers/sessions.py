@@ -25,8 +25,9 @@ class Sessions:
     def restore(self):
         if os.path.exists(self.config.OUTPUT_PATH + self.session_name):
             checkpoint = tf.train.get_checkpoint_state(self.config.OUTPUT_PATH + self.session_name)
-            self.saver.restore(self.session, checkpoint.model_checkpoint_path)
-            print("Model restored from: %s" % checkpoint.model_checkpoint_path)
+            if checkpoint is not None:
+                self.saver.restore(self.session, checkpoint.model_checkpoint_path)
+                print("Model restored from: %s" % checkpoint.model_checkpoint_path)
         pass
 
     def end(self):
